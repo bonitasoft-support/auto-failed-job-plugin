@@ -29,6 +29,7 @@
       <groupId>com.bonitasoft.engine</groupId>
       <artifactId>bonita-server-sp</artifactId>
       <version>7.8.2</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
