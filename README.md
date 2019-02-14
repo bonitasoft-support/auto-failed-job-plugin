@@ -26,14 +26,22 @@ Cluster consideration:
 
 ## Configuration
 
+### Default values
+```
+org.bonitasoft.support.plugin.job.DELAY_IN_MILLIS=3600000
+org.bonitasoft.support.plugin.job.MAX_RESULTS=100
+```
+
+### Change from default
+
 There are 2 possibilities
 
-### Define these environment variable
+#### 1. Define these environment variables
 
     export org_bonitasoft_support_plugin_job_DELAY_IN_MILLIS=3600000
     export org_bonitasoft_support_plugin_job.MAX_RESULTS=100
 
-### Edit setup/platform_conf/current/tenants/1/tenant_engine/bonita-tenant-sp-custom.properties
+#### 2. Edit the setup/platform_conf/current/tenants/1/tenant_engine/bonita-tenant-sp-custom.properties file
 ```
 cd setup
 ./setup.sh pull
