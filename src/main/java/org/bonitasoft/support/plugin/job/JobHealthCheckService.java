@@ -34,14 +34,14 @@ public class JobHealthCheckService implements TenantLifecycleService {
     private boolean stateStarted = false;
 
     @Autowired
-    public JobHealthCheckService(SessionAccessor sessionAccessor ,
+    public JobHealthCheckService(SessionAccessor sessionAccessor,
                                  UserTransactionService userTransactionService,
                                  SchedulerService schedulerService,
                                  JobService jobService,
                                  @Qualifier("tenantTechnicalLoggerService") TechnicalLoggerService technicalLoggerService,
                                  @Value("${org.bonitasoft.support.plugin.job.MAX_RESULTS:100}") int maxResults,
                                  @Value("${tenantId}") long tenantId
-                                 ) {
+    ) {
         this.sessionAccessor = sessionAccessor;
         this.userTransactionService = userTransactionService;
         this.schedulerService = schedulerService;
@@ -63,7 +63,7 @@ public class JobHealthCheckService implements TenantLifecycleService {
             return;
         }
         sessionAccessor.setTenantId(tenantId);
-        userTransactionService.executeInTransaction(this::healthCheckAndReplay);
+        healthCheckAndReplay();
     }
 
     private Void healthCheckAndReplay() {
@@ -72,27 +72,39 @@ public class JobHealthCheckService implements TenantLifecycleService {
             int startIndex = 0;
             int nbJobsFound = -1;
             int totalNbFailedJobs = 0;
-            while (nbJobsFound == -1 || nbJobsFound == maxResults) {
-                List<SFailedJob> failedJobs = null;
-                failedJobs = jobService.getFailedJobs(startIndex, maxResults);
-                nbJobsFound = failedJobs.size();
+            while (nbJobsFound >= maxResults) {
+                List<SFailedJob> failedJobs = replayNextPageOfFailedJobs(startIndex);
                 totalNbFailedJobs += nbJobsFound;
-                for (SFailedJob failedJob : failedJobs) {
-                    if (!stateStarted) {
-                        return null;
-                    }
-                    try {
-                        schedulerService.executeAgain(failedJob.getJobDescriptorId());
-                    } catch (SSchedulerException e) {
-                        technicalLogger.error("Failed to replay a failed job with id: {}, retryNumber: {}.", failedJob.getJobDescriptorId(), failedJob.getRetryNumber(), e);
-                    }
-                }
+                nbJobsFound = failedJobs.size();
+                startIndex += nbJobsFound;
             }
             technicalLogger.info("{} failed jobs found.", totalNbFailedJobs);
-        } catch (SFailedJobReadException e) {
+        } catch (Exception e) {
             technicalLogger.error("Failed to retrieve the failed jobs.", e);
         }
         return null;
+    }
+
+    private List<SFailedJob> replayNextPageOfFailedJobs(final int startIndex) throws Exception {
+        return userTransactionService.executeInTransaction(() -> {
+            List<SFailedJob> failedJobs = jobService.getFailedJobs(startIndex, maxResults);
+            replayFailedJobs(failedJobs);
+            return failedJobs;
+        });
+    }
+
+    private void replayFailedJobs(List<SFailedJob> failedJobs) {
+        for (SFailedJob failedJob : failedJobs) {
+            replayFailedJobs(failedJob);
+        }
+    }
+
+    private void replayFailedJobs(SFailedJob failedJob) {
+        try {
+            schedulerService.executeAgain(failedJob.getJobDescriptorId());
+        } catch (SSchedulerException e) {
+            technicalLogger.error("Failed to replay a failed job with id: {}, retryNumber: {}.", failedJob.getJobDescriptorId(), failedJob.getRetryNumber(), e);
+        }
     }
 
     @Override
