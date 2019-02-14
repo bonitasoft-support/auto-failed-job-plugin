@@ -24,8 +24,29 @@ Cluster consideration:
 * Copy the jar file into ./server/webapps/bonita/WEB-INF/lib/
 * Start the application server
 
+## Configuration
+
+There are 2 possibilities
+
+### Define these environment variable
+
+    export org_bonitasoft_support_plugin_job_DELAY_IN_MILLIS=3600000
+    export org_bonitasoft_support_plugin_job.MAX_RESULTS=100
+
+### Edit setup/platform_conf/current/tenants/1/tenant_engine/bonita-tenant-sp-custom.properties
+```
+cd setup
+./setup.sh pull
+cat >> platform_conf/current/tenants/1/tenant_engine/bonita-tenant-sp-custom.properties
+org.bonitasoft.support.plugin.job.DELAY_IN_MILLIS=86400000
+org.bonitasoft.support.plugin.job.MAX_RESULTS=100
+./setup.sh push
+```
+
 # Report log messages generated
+```
 2019-02-14 16:03:21.495 +0100 INFO: org.bonitasoft.support.plugin.job.JobHealthCheckService THREAD_ID=28 | HOSTNAME=Tetrapharmakon | TENANT_ID=1 | checking failed jobs.
 2019-02-14 16:03:21.497 +0100 INFO: org.bonitasoft.support.plugin.job.JobHealthCheckService THREAD_ID=28 | HOSTNAME=Tetrapharmakon | TENANT_ID=1 | 0 failed jobs found.
 2019-02-14 16:03:41.498 +0100 INFO: org.bonitasoft.support.plugin.job.JobHealthCheckService THREAD_ID=28 | HOSTNAME=Tetrapharmakon | TENANT_ID=1 | checking failed jobs.
 2019-02-14 16:03:41.501 +0100 INFO: org.bonitasoft.support.plugin.job.JobHealthCheckService THREAD_ID=28 | HOSTNAME=Tetrapharmakon | TENANT_ID=1 | 0 failed jobs found.
+```
