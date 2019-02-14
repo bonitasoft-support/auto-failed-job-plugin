@@ -1,4 +1,4 @@
-# auto-failed-job-plugin
+# job-health-check-plugin
 
 bonita engine extension to report failed job and automatically replay them
 
