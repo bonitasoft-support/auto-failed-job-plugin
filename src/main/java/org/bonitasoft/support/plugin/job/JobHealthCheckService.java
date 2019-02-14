@@ -39,7 +39,7 @@ public class JobHealthCheckService implements TenantLifecycleService {
                                  SchedulerService schedulerService,
                                  JobService jobService,
                                  @Qualifier("tenantTechnicalLoggerService") TechnicalLoggerService technicalLoggerService,
-                                 @Value("${org.bonitasoft.support.plugin.job.MAX_RESULTS:1000}") int maxResults,
+                                 @Value("${org.bonitasoft.support.plugin.job.MAX_RESULTS:100}") int maxResults,
                                  @Value("${tenantId}") long tenantId
                                  ) {
         this.sessionAccessor = sessionAccessor;
@@ -57,8 +57,7 @@ public class JobHealthCheckService implements TenantLifecycleService {
         stateStarted = true;
     }
 
-//    @Scheduled(fixedDelayString = "${org.bonitasoft.support.plugin.job.DELAY_IN_MILLIS:600000}")
-    @Scheduled(fixedDelayString = "${org.bonitasoft.support.plugin.job.DELAY_IN_MILLIS:20000}")
+    @Scheduled(fixedDelayString = "${org.bonitasoft.support.plugin.job.DELAY_IN_MILLIS:3600000}")
     private void executeInTransactionHealthCheckAndReplay() throws Exception {
         if (!stateStarted) {
             return;
